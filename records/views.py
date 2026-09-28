@@ -8,6 +8,14 @@ def verificar_acceso_clinico(request):
     if not request.user.is_authenticated:
         raise PermissionDenied
 
+    # Temporal: comprobar qué usuario y grupo están entrando
+    print("USUARIO:", request.user.username)
+    print(
+        "GRUPOS:",
+        list(request.user.groups.values_list('name', flat=True))
+    )
+
+    # Recepción no puede consultar información clínica
     if request.user.groups.filter(name='Recepcion').exists():
         raise PermissionDenied
 
@@ -71,7 +79,6 @@ def record_update(request, pk):
     )
 
     if request.method == 'POST':
-
         form = MedicalRecordForm(
             request.POST,
             instance=record
