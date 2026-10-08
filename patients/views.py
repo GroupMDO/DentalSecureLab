@@ -1,10 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.exceptions import PermissionDenied
 from .models import Patient
 from .forms import PatientForm
 
 
+def es_doctor(user):
+    return user.is_authenticated and user.groups.filter(name='Doctor').exists()
+
+
 def patient_list(request):
-    patients = Patient.objects.all()
+    if not request.user.is_authenticated:
+        raise PermissionDenied
+
+    if es_doctor(request.user):
+        patients = Patient.objects.filter(doctor_asignado=request.user)
+    else:
+        patients = Patient.objects.all()
+
     return render(
         request,
         'patients/patient_list.html',
@@ -13,11 +25,19 @@ def patient_list(request):
 
 
 def patient_create(request):
+    if not request.user.is_authenticated:
+        raise PermissionDenied
+
     if request.method == 'POST':
         form = PatientForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            patient = form.save(commit=False)
+
+            if es_doctor(request.user):
+                patient.doctor_asignado = request.user
+
+            patient.save()
             return redirect('patient_list')
     else:
         form = PatientForm()
@@ -33,7 +53,17 @@ def patient_create(request):
 
 
 def patient_detail(request, pk):
-    patient = get_object_or_404(Patient, pk=pk)
+    if not request.user.is_authenticated:
+        raise PermissionDenied
+
+    if es_doctor(request.user):
+        patient = get_object_or_404(
+            Patient,
+            pk=pk,
+            doctor_asignado=request.user
+        )
+    else:
+        patient = get_object_or_404(Patient, pk=pk)
 
     return render(
         request,
@@ -43,7 +73,17 @@ def patient_detail(request, pk):
 
 
 def patient_update(request, pk):
-    patient = get_object_or_404(Patient, pk=pk)
+    if not request.user.is_authenticated:
+        raise PermissionDenied
+
+    if es_doctor(request.user):
+        patient = get_object_or_404(
+            Patient,
+            pk=pk,
+            doctor_asignado=request.user
+        )
+    else:
+        patient = get_object_or_404(Patient, pk=pk)
 
     if request.method == 'POST':
         form = PatientForm(request.POST, instance=patient)
@@ -65,7 +105,17 @@ def patient_update(request, pk):
 
 
 def patient_delete(request, pk):
-    patient = get_object_or_404(Patient, pk=pk)
+    if not request.user.is_authenticated:
+        raise PermissionDenied
+
+    if es_doctor(request.user):
+        patient = get_object_or_404(
+            Patient,
+            pk=pk,
+            doctor_asignado=request.user
+        )
+    else:
+        patient = get_object_or_404(Patient, pk=pk)
 
     if request.method == 'POST':
         patient.delete()

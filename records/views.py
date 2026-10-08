@@ -1,9 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.exceptions import PermissionDenied
 from .models import MedicalRecord
 from .forms import MedicalRecordForm
 
 
+def verificar_acceso_clinico(request):
+    if not request.user.is_authenticated:
+        raise PermissionDenied
+
+    # Temporal: comprobar qué usuario y grupo están entrando
+    print("USUARIO:", request.user.username)
+    print(
+        "GRUPOS:",
+        list(request.user.groups.values_list('name', flat=True))
+    )
+
+    # Recepción no puede consultar información clínica
+    if request.user.groups.filter(name='Recepcion').exists():
+        raise PermissionDenied
+
+
 def record_list(request):
+    verificar_acceso_clinico(request)
 
     records = MedicalRecord.objects.select_related('patient').all()
 
@@ -15,6 +33,7 @@ def record_list(request):
 
 
 def record_create(request):
+    verificar_acceso_clinico(request)
 
     if request.method == 'POST':
         form = MedicalRecordForm(request.POST)
@@ -37,6 +56,7 @@ def record_create(request):
 
 
 def record_detail(request, pk):
+    verificar_acceso_clinico(request)
 
     record = get_object_or_404(
         MedicalRecord,
@@ -51,6 +71,7 @@ def record_detail(request, pk):
 
 
 def record_update(request, pk):
+    verificar_acceso_clinico(request)
 
     record = get_object_or_404(
         MedicalRecord,
@@ -58,7 +79,6 @@ def record_update(request, pk):
     )
 
     if request.method == 'POST':
-
         form = MedicalRecordForm(
             request.POST,
             instance=record
