@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 
 def login_view(request):
@@ -17,6 +17,7 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
+            return redirect("dashboard")
         else:
             error = "Usuario o contraseña incorrectos"
 
