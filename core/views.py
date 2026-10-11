@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 
 from patients.models import Patient
 from agenda.models import Appointment
@@ -7,6 +8,7 @@ from records.models import MedicalRecord
 from payments.models import Payment
 
 
+@login_required(login_url="/usuarios/login/")
 def dashboard(request):
 
     today = timezone.localdate()

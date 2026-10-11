@@ -25,4 +25,5 @@ urlpatterns = [
     path('agenda/', include('agenda.urls')),
     path('expedientes/', include('records.urls')),
     path('pagos/', include('payments.urls')),
+    path('usuarios/', include('users.urls')),
 ]

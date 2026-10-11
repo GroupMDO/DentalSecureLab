@@ -1,9 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.exceptions import PermissionDenied
+
 from .models import MedicalRecord
 from .forms import MedicalRecordForm
 
 
+def verificar_acceso_expedientes(request):
+    if request.user.groups.filter(name="Soporte").exists():
+        raise PermissionDenied
+
+
 def record_list(request):
+
+    verificar_acceso_expedientes(request)
 
     records = MedicalRecord.objects.select_related('patient').all()
 
@@ -15,6 +24,8 @@ def record_list(request):
 
 
 def record_create(request):
+
+    verificar_acceso_expedientes(request)
 
     if request.method == 'POST':
         form = MedicalRecordForm(request.POST)
@@ -38,6 +49,8 @@ def record_create(request):
 
 def record_detail(request, pk):
 
+    verificar_acceso_expedientes(request)
+
     record = get_object_or_404(
         MedicalRecord,
         pk=pk
@@ -51,6 +64,8 @@ def record_detail(request, pk):
 
 
 def record_update(request, pk):
+
+    verificar_acceso_expedientes(request)
 
     record = get_object_or_404(
         MedicalRecord,
