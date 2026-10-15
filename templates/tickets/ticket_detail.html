@@ -1,0 +1,105 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2>Detalle del ticket {{ ticket.folio }}</h2>
+
+    <div class="card mt-4">
+        <div class="card-body">
+
+            <h4>{{ ticket.titulo }}</h4>
+
+            <p>
+                <strong>Descripción:</strong>
+                {{ ticket.descripcion }}
+            </p>
+
+            <p>
+                <strong>Solicitante:</strong>
+                {{ ticket.solicitante }}
+            </p>
+
+            <p>
+                <strong>Activo afectado:</strong>
+                {{ ticket.activo_afectado }}
+            </p>
+
+            <p>
+                <strong>Tipo:</strong>
+                {{ ticket.tipo }}
+            </p>
+
+            <p>
+                <strong>Prioridad:</strong>
+                {{ ticket.prioridad }}
+            </p>
+
+            <p>
+                <strong>Área asignada:</strong>
+                {{ ticket.area_asignada }}
+            </p>
+
+            <p>
+                <strong>Estado actual:</strong>
+                {{ ticket.estado }}
+            </p>
+
+            <p>
+                <strong>Fecha de creación:</strong>
+                {{ ticket.fecha_creacion|date:"d/m/Y H:i" }}
+            </p>
+
+        </div>
+    </div>
+
+    {% if user.is_staff %}
+    <div class="card mt-4">
+        <div class="card-body">
+
+            <h4>Cambiar estado</h4>
+
+            <form method="post"
+                  action="{% url 'tickets:ticket_change_status' ticket.pk %}">
+
+                {% csrf_token %}
+
+                <label for="estado" class="form-label">
+                    Nuevo estado
+                </label>
+
+                <select name="estado"
+                        id="estado"
+                        class="form-select"
+                        required>
+
+                    {% for valor, etiqueta in estados %}
+                    <option value="{{ valor }}"
+                        {% if ticket.estado == valor %}selected{% endif %}>
+                        {{ etiqueta }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+                <button type="submit"
+                        class="btn btn-primary mt-3">
+                    Actualizar estado
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'tickets:ticket_list' %}"
+           class="btn btn-secondary">
+            Volver al listado
+        </a>
+    </div>
+
+</div>
+{% endblock %}
