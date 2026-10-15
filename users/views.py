@@ -1,6 +1,6 @@
-from django.contrib.auth import authenticate, login
-from django.shortcuts import render
-
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.utils.http import url_has_allowed_host_and_scheme
 
 def login_view(request):
     error = None
@@ -17,6 +17,12 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
+            
+            # Sanitización de redirección 'next' (Prevención de Open Redirect)
+            next_url = request.GET.get('next') or request.POST.get('next')
+            if next_url and url_has_allowed_host_and_scheme(url=next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
+            return redirect('dashboard')
         else:
             error = "Usuario o contraseña incorrectos"
 
@@ -25,3 +31,7 @@ def login_view(request):
         "users/login.html",
         {"error": error}
     )
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')

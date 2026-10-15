@@ -135,6 +135,17 @@ MAILERS = {
     },
 }
 
+
+# Redirecciones de autenticación
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Gestión y expiración de sesiones (ASVS V3)
+SESSION_COOKIE_AGE = 1800  # 30 minutos
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+
 # Seguridad de cookies de sesión y CSRF
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
