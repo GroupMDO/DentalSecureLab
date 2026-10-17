@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.utils.http import url_has_allowed_host_and_scheme
 
+
 def login_view(request):
     error = None
 
@@ -18,7 +19,7 @@ def login_view(request):
         if user is not None:
             login(request, user)
             
-            # Sanitización de redirección 'next' (Prevención de Open Redirect)
+            # Sanitización de redirección 'next' (Prevención de Open Redirect - ASVS V5)
             next_url = request.GET.get('next') or request.POST.get('next')
             if next_url and url_has_allowed_host_and_scheme(url=next_url, allowed_hosts={request.get_host()}):
                 return redirect(next_url)
@@ -29,8 +30,12 @@ def login_view(request):
     return render(
         request,
         "users/login.html",
-        {"error": error}
+        {
+            "error": error,
+            "next": request.GET.get("next", "")
+        }
     )
+
 
 def logout_view(request):
     logout(request)

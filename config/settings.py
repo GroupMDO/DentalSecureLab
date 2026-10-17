@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'agenda',
     'records',
     'payments',
+    'tickets',
 ]
 
 MIDDLEWARE = [
@@ -118,7 +119,6 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
@@ -127,7 +127,6 @@ STATICFILES_DIRS = [
 
 
 # Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
 MAILERS = {
     'default': {
@@ -141,15 +140,13 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Gestión y expiración de sesiones (ASVS V3)
-SESSION_COOKIE_AGE = 1800  # 30 minutos
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_SAVE_EVERY_REQUEST = True
-
-# Seguridad de cookies de sesión y CSRF
+# Gestión, expiración y seguridad de cookies de sesión y CSRF (ASVS V3)
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_AGE = 1800  # 30 minutos
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
 
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = not DEBUG
