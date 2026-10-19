@@ -148,3 +148,56 @@ class LoginTest(TestCase):
             response.status_code,
             200
         )
+
+    def test_bloqueo_fuerza_bruta_tras_cinco_intentos_fallidos(self):
+        from django.core.cache import cache
+        cache.clear()
+
+        User.objects.create_user(
+            username="victima_bruteforce",
+            password="PasswordValido123!"
+        )
+
+        for _ in range(4):
+            r = self.client.post(
+                reverse("login"),
+                {"username": "victima_bruteforce", "password": "PasswordErroneo!"}
+            )
+            self.assertEqual(r.status_code, 200)
+            self.assertContains(r, "Usuario o contraseña incorrectos")
+
+        r5 = self.client.post(
+            reverse("login"),
+            {"username": "victima_bruteforce", "password": "PasswordErroneo!"}
+        )
+        self.assertEqual(r5.status_code, 403)
+        self.assertContains(r5, "Cuenta bloqueada temporalmente por acumular 5 intentos fallidos", status_code=403)
+
+        r6 = self.client.post(
+            reverse("login"),
+            {"username": "victima_bruteforce", "password": "PasswordValido123!"}
+        )
+        self.assertEqual(r6.status_code, 403)
+        self.assertContains(r6, "Cuenta bloqueada temporalmente", status_code=403)
+
+    def test_login_exitoso_restablece_contador_de_intentos(self):
+        from django.core.cache import cache
+        cache.clear()
+
+        User.objects.create_user(
+            username="usuario_recuperado",
+            password="PasswordValido123!"
+        )
+
+        for _ in range(2):
+            self.client.post(
+                reverse("login"),
+                {"username": "usuario_recuperado", "password": "Erroneo!"}
+            )
+
+        r_ok = self.client.post(
+            reverse("login"),
+            {"username": "usuario_recuperado", "password": "PasswordValido123!"}
+        )
+        self.assertEqual(r_ok.status_code, 302)
+        self.assertIsNone(cache.get("login_attempts_usuario_recuperado"))

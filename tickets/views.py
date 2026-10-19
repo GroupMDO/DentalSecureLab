@@ -55,8 +55,11 @@ def ticket_detail(request, pk):
 @require_POST
 def ticket_change_status(request, pk):
     if not request.user.is_staff:
-        return HttpResponseForbidden(
-            "No tienes permisos para cambiar el estado."
+        return render(
+            request,
+            "403.html",
+            {"exception": "No tienes permisos de personal autorizado para cambiar el estado del ticket."},
+            status=403,
         )
 
     ticket = get_object_or_404(Ticket, pk=pk)
@@ -67,11 +70,15 @@ def ticket_change_status(request, pk):
     ]
 
     if nuevo_estado not in estados_validos:
-        return HttpResponseForbidden(
-            "El estado seleccionado no es válido."
+        return render(
+            request,
+            "403.html",
+            {"exception": "El estado seleccionado no es válido."},
+            status=403,
         )
 
     ticket.estado = nuevo_estado
     ticket.save(update_fields=["estado"])
 
     return redirect("tickets:ticket_detail", pk=ticket.pk)
+

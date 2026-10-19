@@ -85,6 +85,11 @@
 
                     <a href="{% url 'payment_list' %}" class="nav-item">
                         <span>💳 Pagos</span>
+                        {% for g in user.groups.all %}
+                            {% if g.name == 'Soporte' %}
+                                <span class="nav-lock-badge" title="Restringido para Soporte TI">🔒</span>
+                            {% endif %}
+                        {% endfor %}
                     </a>
 
                     <a href="{% url 'tickets:ticket_list' %}" class="nav-item">

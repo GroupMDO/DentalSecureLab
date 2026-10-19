@@ -4,8 +4,22 @@ from .models import Payment
 from .forms import PaymentForm
 
 
+def verificar_acceso_pagos(request):
+    if request.user.groups.filter(name="Soporte").exists() and not request.user.is_superuser:
+        return render(
+            request,
+            "403.html",
+            {"exception": "El personal de Soporte TI no tiene permisos para acceder al módulo de pagos."},
+            status=403,
+        )
+    return None
+
+
 @login_required
 def payment_list(request):
+    bloqueado = verificar_acceso_pagos(request)
+    if bloqueado:
+        return bloqueado
 
     payments = Payment.objects.select_related('patient').all()
 
@@ -18,6 +32,9 @@ def payment_list(request):
 
 @login_required
 def payment_create(request):
+    bloqueado = verificar_acceso_pagos(request)
+    if bloqueado:
+        return bloqueado
 
     if request.method == 'POST':
         form = PaymentForm(request.POST)
@@ -41,6 +58,9 @@ def payment_create(request):
 
 @login_required
 def payment_update(request, pk):
+    bloqueado = verificar_acceso_pagos(request)
+    if bloqueado:
+        return bloqueado
 
     payment = get_object_or_404(Payment, pk=pk)
 
@@ -65,4 +85,5 @@ def payment_update(request, pk):
             'form': form,
             'title': 'Editar pago'
         }
-    )
+    )
+

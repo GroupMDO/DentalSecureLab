@@ -16,7 +16,11 @@ Acceso Restringido | DentalSecureLab
 
         <h2 class="access-denied-title">Acceso Restringido</h2>
         <p class="access-simple-text">
-            No tienes permisos para acceder a esta sección.
+            {% if exception %}
+                {{ exception }}
+            {% else %}
+                No tienes permisos para acceder a esta sección.
+            {% endif %}
         </p>
 
         <div class="access-denied-actions">

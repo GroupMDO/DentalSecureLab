@@ -49,3 +49,21 @@ class PatientSecurityAccessTest(TestCase):
         response = self.client.get(reverse("patient_list"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Carlos")
+
+    def test_usuario_no_admin_bloqueado_al_eliminar_paciente(self):
+        self.client.force_login(self.user)
+        response = self.client.post(reverse("patient_delete", args=[self.patient.pk]))
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, "Solo los usuarios con rol Administrador", status_code=403)
+        self.assertTrue(Patient.objects.filter(pk=self.patient.pk).exists())
+
+    def test_usuario_admin_puede_eliminar_paciente(self):
+        admin_user = User.objects.create_superuser(
+            username="admin_deleter",
+            password="AdminPassword123!"
+        )
+        self.client.force_login(admin_user)
+        response = self.client.post(reverse("patient_delete", args=[self.patient.pk]))
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Patient.objects.filter(pk=self.patient.pk).exists())
+

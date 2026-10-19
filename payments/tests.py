@@ -48,3 +48,38 @@ class PaymentSecurityAccessTest(TestCase):
         response = self.client.get(reverse("payment_list"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Consulta de valoración")
+
+    def test_usuario_soporte_bloqueado_en_pagos(self):
+        from django.contrib.auth.models import Group
+        soporte_user = User.objects.create_user(
+            username="soporte_caja",
+            password="Password123!"
+        )
+        grupo_soporte, _ = Group.objects.get_or_create(name="Soporte")
+        soporte_user.groups.add(grupo_soporte)
+
+        self.client.force_login(soporte_user)
+
+        r_list = self.client.get(reverse("payment_list"))
+        self.assertEqual(r_list.status_code, 403)
+        self.assertContains(r_list, "Soporte TI no tiene permisos", status_code=403)
+
+        r_create = self.client.get(reverse("payment_create"))
+        self.assertEqual(r_create.status_code, 403)
+
+        r_update = self.client.get(reverse("payment_update", args=[self.payment.pk]))
+        self.assertEqual(r_update.status_code, 403)
+
+    def test_usuario_recepcion_puede_acceder_pagos(self):
+        from django.contrib.auth.models import Group
+        recepcion_user = User.objects.create_user(
+            username="recepcion_caja",
+            password="Password123!"
+        )
+        grupo_rec, _ = Group.objects.get_or_create(name="Recepción")
+        recepcion_user.groups.add(grupo_rec)
+
+        self.client.force_login(recepcion_user)
+        response = self.client.get(reverse("payment_list"))
+        self.assertEqual(response.status_code, 200)
+

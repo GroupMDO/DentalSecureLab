@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.shortcuts import render
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -21,9 +22,8 @@ def dashboard(request):
 
     total_records = MedicalRecord.objects.count()
 
-    total_payments = sum(
-        payment.amount
-        for payment in Payment.objects.all()
+    total_payments = (
+        Payment.objects.aggregate(total=Sum("amount"))["total"] or 0
     )
 
     context = {
