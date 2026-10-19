@@ -1,28 +1,76 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}DentalSecureLab{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}DentalSecureLab{% endblock %}
+    </title>
+
+    <link rel="stylesheet"
+          href="{% static 'css/styles.css' %}">
 </head>
+
 <body>
 
     <header class="topbar">
         <h1>DentalSecureLab</h1>
-        <span>Laboratorio de Seguridad</span>
+
+        <div class="user-info">
+            <span>Laboratorio de Seguridad</span>
+
+            {% if user.is_authenticated %}
+                <span>
+                    Usuario: {{ user.get_username }}
+                </span>
+
+                <form method="post"
+                      action="{% url 'logout' %}"
+                      style="display: inline;">
+                    {% csrf_token %}
+
+                    <button type="submit"
+                            class="btn-logout">
+                        Cerrar sesión
+                    </button>
+                </form>
+            {% endif %}
+        </div>
     </header>
 
     <div class="layout">
 
         <aside class="sidebar">
             <nav>
-                <a href="/">Dashboard</a>
-                <a href="{% url 'patient_list' %}">Pacientes</a>
-                <a href="{% url 'appointment_list' %}">Agenda</a>
-                <a href="{% url 'record_list' %}">Expedientes</a>
-                <a href="{% url 'payment_list' %}">Pagos</a>
+                <a href="{% url 'dashboard' %}">
+                    Dashboard
+                </a>
+
+                <a href="{% url 'patient_list' %}">
+                    Pacientes
+                </a>
+
+                <a href="{% url 'appointment_list' %}">
+                    Agenda
+                </a>
+
+                <a href="{% url 'record_list' %}">
+                    Expedientes
+                </a>
+
+                <a href="{% url 'payment_list' %}">
+                    Pagos
+                </a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'tickets:ticket_list' %}">
+                        Tickets TI
+                    </a>
+                {% endif %}
             </nav>
         </aside>
 
