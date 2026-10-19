@@ -1,5 +1,15 @@
-from django.db import models
+import re
+import unicodedata
 import uuid
+from django.db import models
+
+
+def normalizar_texto(texto):
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', texto)
+        if unicodedata.category(c) != 'Mn'
+    ).lower()
+
 
 class Ticket(models.Model):
     TIPOS = [
@@ -78,26 +88,29 @@ class Ticket(models.Model):
     )
 
     def derivar_automaticamente(self):
-        texto = f"{self.titulo} {self.descripcion}".lower()
+        texto = normalizar_texto(f"{self.titulo} {self.descripcion}")
 
         palabras_infraestructura = [
             "servidor", "red", "internet",
-            "wifi", "router", "conexión",
+            "wifi", "router", "conexion",
         ]
 
         palabras_desarrollo = [
-            "software", "aplicación", "sistema",
-            "código", "programación", "bug",
+            "software", "aplicacion", "sistema",
+            "codigo", "programacion", "bug",
         ]
 
+        def contiene_palabra(palabra, texto_fuente):
+            return bool(re.search(rf"\b{re.escape(palabra)}\b", texto_fuente))
+
         if any(
-            palabra in texto
+            contiene_palabra(palabra, texto)
             for palabra in palabras_infraestructura
         ):
             self.area_asignada = "Infraestructura"
 
         elif any(
-            palabra in texto
+            contiene_palabra(palabra, texto)
             for palabra in palabras_desarrollo
         ):
             self.area_asignada = "Desarrollo"

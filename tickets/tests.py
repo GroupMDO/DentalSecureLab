@@ -69,6 +69,32 @@ class TicketTest(TestCase):
 
         self.assertEqual(ticket.area_asignada, "Soporte")
 
+    def test_derivacion_palabra_red_no_falso_positivo_en_pared_o_credencial(self):
+        ticket_pared = Ticket.objects.create(
+            titulo="Problema en la pared del consultorio",
+            descripcion="Se cuarteó la pared cerca del enchufe",
+        )
+        self.assertEqual(ticket_pared.area_asignada, "Soporte")
+
+        ticket_cred = Ticket.objects.create(
+            titulo="Credencial vencida",
+            descripcion="Solicito renovación de credencial",
+        )
+        self.assertEqual(ticket_cred.area_asignada, "Soporte")
+
+    def test_derivacion_sin_tildes(self):
+        ticket_conexion = Ticket.objects.create(
+            titulo="Falla de conexion",
+            descripcion="El equipo se quedo sin conexion",
+        )
+        self.assertEqual(ticket_conexion.area_asignada, "Infraestructura")
+
+        ticket_codigo = Ticket.objects.create(
+            titulo="Error en el codigo",
+            descripcion="Fallo en la ejecucion del script",
+        )
+        self.assertEqual(ticket_codigo.area_asignada, "Desarrollo")
+
     def test_estado_inicial_registrado(self):
         ticket = Ticket.objects.create(
             titulo="Solicitud de ayuda",
@@ -119,6 +145,7 @@ class TicketViewTest(TestCase):
         )
 
         self.assertEqual(respuesta.status_code, 302)
+        self.assertIn("/usuarios/login/", respuesta.url)
 
     def test_usuario_autenticado_puede_ver_listado(self):
         self.client.force_login(self.usuario)
@@ -128,6 +155,26 @@ class TicketViewTest(TestCase):
         )
 
         self.assertEqual(respuesta.status_code, 200)
+
+    def test_crear_ticket_post_exitoso(self):
+        self.client.force_login(self.usuario)
+
+        respuesta = self.client.post(
+            reverse("tickets:ticket_create"),
+            {
+                "titulo": "Falla en router",
+                "descripcion": "El router se reinicia solo",
+                "solicitante": "Dra. Gomez",
+                "activo_afectado": "Router Principal",
+                "tipo": "Incidencia",
+                "prioridad": "Alta",
+            },
+        )
+
+        self.assertEqual(respuesta.status_code, 302)
+        nuevo_ticket = Ticket.objects.get(titulo="Falla en router")
+        self.assertEqual(nuevo_ticket.area_asignada, "Infraestructura")
+        self.assertEqual(nuevo_ticket.estado, "Registrado")
 
     def test_usuario_no_staff_no_cambia_estado(self):
         self.client.force_login(self.usuario)

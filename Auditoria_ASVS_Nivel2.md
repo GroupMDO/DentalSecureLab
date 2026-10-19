@@ -1,50 +1,206 @@
-\# Auditoría de Seguridad ASVS Nivel 2 - DentalSecureLab
+\# Auditoría de Seguridad Web — OWASP ASVS Nivel 2
 
 
 
-\## 1. Objetivo y Alcance
-
-Documentar las verificaciones y el blindaje del módulo de Autenticación y Login del sistema DentalSecureLab, cumpliendo con los estándares de seguridad OWASP ASVS Nivel 2 y la directiva PRO-DES-06.
+\## 1. Identificación del trabajo
 
 
 
-\## 2. Metodología TDD
+\- \*\*Proyecto:\*\* DentalSecureLab
 
-Se aplicó desarrollo guiado por pruebas (TDD):
+\- \*\*Instrucción:\*\* PRO-DES-06
 
-\- \*\*Red:\*\* Se verificó la carencia inicial de un formulario web estructurado con protección CSRF en el login.
+\- \*\*Ticket relacionado:\*\* TK-2026-004 — Módulo de autenticación y login con roles
 
-\- \*\*Green:\*\* Se implementó la plantilla con campos seguros, token CSRF y configuraciones de cookies.
+\- \*\*Responsabilidad:\*\* Seguridad Web / DevSecOps
 
-\- \*\*Refactor:\*\* Se validó la ejecución exitosa de la suite de pruebas unitarias.
+\- \*\*Rama de trabajo:\*\* `security/login-hardening`
 
+\- \*\*Estándar de referencia:\*\* OWASP Application Security Verification Standard (ASVS), Nivel 2
 
+\- \*\*Fecha de inicio:\*\* 10 de octubre de 2026
 
-\## 3. Controles Evaluados y Trazabilidad
-
-
-
-\### Control 5.1: Autenticación y Protección de Credenciales
-
-\- \*\*ASVS Requisito:\*\* Verificación de controles de autenticación robusta y protección contra falsificación de peticiones en sitios cruzados (CSRF).
-
-\- \*\*Vulnerabilidad:\*\* Falta de formulario HTML estructurado y token CSRF visible en la plantilla de inicio de sesión.
-
-\- \*\*Archivo afectado:\*\* `templates/users/login.html` y `config/settings.py`.
-
-\- \*\*Función / Componente:\*\* `login\_view` y políticas de cookies de sesión (`SESSION\_COOKIE\_HTTPONLY`, `SESSION\_COOKIE\_SAMESITE`, `CSRF\_COOKIE\_SAMESITE`).
-
-\- \*\*Cambio realizado:\*\* Se incorporaron las etiquetas `<form>`, los campos de entrada requeridos y la directiva `{% csrf\_token %}` en el HTML, junto con el endurecimiento de cookies en `settings.py`.
-
-\- \*\*Test asociado:\*\* `test\_pagina\_login\_existe` y pruebas de ejecución del cliente Django.
-
-\- \*\*Evidencia:\*\* Captura de pantalla `03\_pruebas\_despues\_del\_cambio.png` mostrando las 8 pruebas en estado `OK`.
-
-\- \*\*Commit:\*\* Registro formal en la rama `security/login-hardening`.
+\- \*\*Estado:\*\* En progreso
 
 
 
-\## 4. Conclusión Provisional
+\## 2. Objetivo
 
-El módulo de login cuenta con la estructura base blindada, cookies seguras y validación de pruebas unitarias en verde.
+
+
+Revisar y reforzar la seguridad del módulo de autenticación, con especial atención a la protección de credenciales, sesiones, intentos fallidos de inicio de sesión y autorización por roles.
+
+
+
+\## 3. Alcance
+
+
+
+\- Inicio de sesión con credenciales válidas e inválidas.
+
+\- Protección y configuración de sesiones y cookies.
+
+\- Revisión de intentos repetidos de autenticación fallidos.
+
+\- Control de acceso para los roles Administrador, Operador y Soporte.
+
+\- Restricción de acceso a usuarios no autenticados.
+
+\- Pruebas automatizadas, pruebas de regresión y registro de evidencias.
+
+
+
+\## 4. Metodología TDD
+
+
+
+1\. \*\*RED:\*\* ejecutar una prueba y registrar el resultado real antes del cambio.
+
+2\. \*\*GREEN:\*\* implementar el cambio mínimo necesario y repetir la prueba.
+
+3\. \*\*REFACTOR:\*\* revisar el cambio y ejecutar las pruebas de regresión.
+
+
+
+No se registrarán resultados ni evidencias que no se hayan obtenido realmente.
+
+
+
+\## 5. Controles en revisión
+
+
+
+\### 5.1 Autenticación y protección del login
+
+
+
+\- \*\*Referencia ASVS específica:\*\* pendiente de verificar.
+
+\- \*\*Riesgo:\*\* acceso no autorizado por debilidades en la autenticación.
+
+\- \*\*Archivos relacionados:\*\* `users/views.py`, `users/tests.py`, `templates/users/login.html`.
+
+\- \*\*Función principal identificada:\*\* `login\_view`.
+
+\- \*\*Estado inicial:\*\* pendiente de validar mediante pruebas.
+
+\- \*\*RED:\*\* pendiente.
+
+\- \*\*GREEN:\*\* pendiente.
+
+\- \*\*Regresión:\*\* pendiente.
+
+\- \*\*Evidencias:\*\* pendientes.
+
+\- \*\*Commit:\*\* pendiente.
+
+
+
+\### 5.2 Sesiones y cookies
+
+
+
+\- \*\*Referencia ASVS específica:\*\* pendiente de verificar.
+
+\- \*\*Riesgo:\*\* exposición o uso indebido de sesiones.
+
+\- \*\*Archivo relacionado:\*\* `config/settings.py`.
+
+\- \*\*Observación inicial:\*\* se identificaron los middleware de sesiones, protección CSRF y autenticación. La búsqueda inicial no encontró configuraciones explícitas de seguridad para cookies y sesiones.
+
+\- \*\*Resultado de pruebas:\*\* pendiente.
+
+\- \*\*Evidencias y commit:\*\* pendientes.
+
+
+
+\### 5.3 Intentos fallidos de inicio de sesión
+
+
+
+\- \*\*Referencia ASVS específica:\*\* pendiente de verificar.
+
+\- \*\*Riesgo:\*\* intentos repetidos de adivinar contraseñas.
+
+\- \*\*Observación inicial:\*\* se identificó un PR relacionado con el bloqueo temporal tras cinco intentos fallidos. Se revisará para evitar duplicar cambios.
+
+\- \*\*Resultado de pruebas:\*\* pendiente.
+
+\- \*\*Evidencias y commit:\*\* pendientes.
+
+
+
+\### 5.4 Autorización por roles
+
+
+
+\- \*\*Referencia ASVS específica:\*\* pendiente de verificar.
+
+\- \*\*Riesgo:\*\* acceso a funciones sin los permisos correspondientes.
+
+\- \*\*Archivos relacionados:\*\* `records/views.py`, `users/tests.py`.
+
+\- \*\*Observación inicial:\*\* se identificó una restricción para el rol Soporte en vistas de expedientes. Queda pendiente validar el acceso anónimo y los permisos de cada operación.
+
+\- \*\*Roles por validar:\*\* Administrador, Operador y Soporte.
+
+\- \*\*Resultado de pruebas:\*\* pendiente.
+
+\- \*\*Evidencias y commit:\*\* pendientes.
+
+
+
+\## 6. Resumen de pruebas
+
+
+
+| Prueba | Estado |
+
+|---|---|
+
+| Login válido e inválido | Pendiente de ejecutar |
+
+| Acceso al dashboard sin autenticación | Pendiente de ejecutar |
+
+| Configuración de sesiones y cookies | Pendiente de validar |
+
+| Bloqueo tras cinco intentos fallidos | Pendiente de revisar y probar |
+
+| Permisos por rol | Pendiente de validar |
+
+| Acceso anónimo a operaciones protegidas | Pendiente de ejecutar |
+
+| Suite de regresión | Pendiente de ejecutar |
+
+
+
+\## 7. Evidencias
+
+
+
+Se agregarán capturas reales de las pruebas iniciales, los cambios de seguridad, las pruebas aprobadas y la regresión. Las capturas no deberán mostrar contraseñas, tokens ni otros datos sensibles.
+
+
+
+\## 8. Trazabilidad
+
+
+
+Para cada control se registrará la siguiente información:
+
+
+
+\*\*ASVS → riesgo o vulnerabilidad → archivo → función → cambio → prueba → evidencia → commit.\*\*
+
+
+
+\## 9. Conclusión
+
+
+
+La auditoría se encuentra en fase inicial. La presencia de middleware de seguridad no demuestra por sí sola que todos los controles estén correctamente implementados. La conclusión final se completará después de ejecutar las pruebas, revisar los controles, realizar los cambios necesarios y registrar la evidencia.
+
+
+
+
 
