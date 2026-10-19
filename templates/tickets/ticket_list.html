@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Tickets TI | DentalSecureLab{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Gestión de Tickets TI</h2>
+        <p>Listado y seguimiento de incidencias y solicitudes técnicas</p>
+    </div>
+
+    <a href="{% url 'tickets:ticket_create' %}" class="btn">
+        + Nuevo ticket
+    </a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Folio</th>
+            <th>Título</th>
+            <th>Tipo</th>
+            <th>Prioridad</th>
+            <th>Área asignada</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ticket in tickets %}
+        <tr>
+            <td><strong>{{ ticket.folio }}</strong></td>
+            <td>{{ ticket.titulo }}</td>
+            <td>{{ ticket.tipo }}</td>
+            <td>{{ ticket.prioridad }}</td>
+            <td>{{ ticket.area_asignada }}</td>
+            <td>{{ ticket.estado }}</td>
+            <td>{{ ticket.fecha_creacion|date:"d/m/Y H:i" }}</td>
+            <td>
+                <a href="{% url 'tickets:ticket_detail' ticket.pk %}" class="btn btn-sm">
+                    Ver detalle
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="8" style="text-align: center; color: #888; padding: 25px;">
+                No hay tickets registrados.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

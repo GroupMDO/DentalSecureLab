@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket {{ ticket.folio }} | DentalSecureLab{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Detalle del ticket {{ ticket.folio }}</h2>
+        <p>{{ ticket.titulo }}</p>
+    </div>
+
+    <div>
+        <a href="{% url 'tickets:ticket_list' %}" class="btn-secondary">
+            Volver al listado
+        </a>
+    </div>
+</div>
+
+<div class="detail-card">
+    <p>
+        <strong>Título:</strong>
+        {{ ticket.titulo }}
+    </p>
+
+    <p>
+        <strong>Descripción:</strong>
+        {{ ticket.descripcion }}
+    </p>
+
+    <p>
+        <strong>Solicitante:</strong>
+        {{ ticket.solicitante|default:"No especificado" }}
+    </p>
+
+    <p>
+        <strong>Activo afectado:</strong>
+        {{ ticket.activo_afectado|default:"No especificado" }}
+    </p>
+
+    <p>
+        <strong>Tipo:</strong>
+        {{ ticket.tipo }}
+    </p>
+
+    <p>
+        <strong>Prioridad:</strong>
+        {{ ticket.prioridad }}
+    </p>
+
+    <p>
+        <strong>Área asignada:</strong>
+        {{ ticket.area_asignada }}
+    </p>
+
+    <p>
+        <strong>Estado actual:</strong>
+        {{ ticket.estado }}
+    </p>
+
+    <p>
+        <strong>Fecha de creación:</strong>
+        {{ ticket.fecha_creacion|date:"d/m/Y H:i" }}
+    </p>
+</div>
+
+{% if user.is_staff %}
+<div class="detail-card" style="margin-top: 25px;">
+    <h3 style="margin-bottom: 15px; color: #1f3c5b;">Cambiar estado</h3>
+
+    <form method="post" action="{% url 'tickets:ticket_change_status' ticket.pk %}" class="form" style="padding: 0; border: none; max-width: 100%;">
+        {% csrf_token %}
+
+        <p>
+            <label for="estado">
+                Nuevo estado:
+            </label>
+
+            <select name="estado" id="estado" required>
+                {% for valor, etiqueta in estados %}
+                <option value="{{ valor }}" {% if ticket.estado == valor %}selected{% endif %}>
+                    {{ etiqueta }}
+                </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <button type="submit" class="btn">
+            Actualizar estado
+        </button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}
