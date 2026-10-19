@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import Appointment
 from .forms import AppointmentForm
 
 
+@login_required
 def appointment_list(request):
     appointments = Appointment.objects.all()
 
@@ -13,6 +15,7 @@ def appointment_list(request):
     )
 
 
+@login_required
 def appointment_create(request):
 
     if request.method == 'POST':
@@ -34,6 +37,7 @@ def appointment_create(request):
     )
 
 
+@login_required
 def appointment_update(request, pk):
 
     appointment = get_object_or_404(Appointment, pk=pk)
@@ -58,4 +62,4 @@ def appointment_update(request, pk):
             'form': form,
             'title': 'Editar cita'
         }
-    )
+    )

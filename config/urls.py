@@ -25,3 +25,6 @@ urlpatterns = [
 
     path('tickets/', include('tickets.urls')),
 ]
+
+handler403 = 'core.views.custom_403_view'
+

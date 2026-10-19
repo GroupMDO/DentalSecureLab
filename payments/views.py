@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import Payment
 from .forms import PaymentForm
 
 
+@login_required
 def payment_list(request):
 
     payments = Payment.objects.select_related('patient').all()
@@ -14,6 +16,7 @@ def payment_list(request):
     )
 
 
+@login_required
 def payment_create(request):
 
     if request.method == 'POST':
@@ -36,6 +39,7 @@ def payment_create(request):
     )
 
 
+@login_required
 def payment_update(request, pk):
 
     payment = get_object_or_404(Payment, pk=pk)
@@ -61,4 +65,4 @@ def payment_update(request, pk):
             'form': form,
             'title': 'Editar pago'
         }
-    )
+    )

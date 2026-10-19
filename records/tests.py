@@ -34,15 +34,21 @@ class RecordsAccessControlTest(TestCase):
         self.assertEqual(respuesta.status_code, 302)
         self.assertIn("/usuarios/login/", respuesta.url)
 
-    def test_usuario_soporte_bloqueado_en_expedientes(self):
+    def test_usuario_soporte_bloqueado_en_expedientes_con_interfaz_informativa(self):
         self.client.force_login(self.user_soporte)
         respuesta = self.client.get(reverse("record_list"))
         self.assertEqual(respuesta.status_code, 403)
+        self.assertContains(respuesta, "Acceso Restringido: Expedientes Clínicos", status_code=403)
+        self.assertContains(respuesta, "Soporte TI", status_code=403)
+        self.assertContains(respuesta, "Tickets TI", status_code=403)
 
-    def test_usuario_recepcion_bloqueado_en_expedientes(self):
+    def test_usuario_recepcion_bloqueado_en_expedientes_con_interfaz_informativa(self):
         self.client.force_login(self.user_recepcion)
         respuesta = self.client.get(reverse("record_list"))
         self.assertEqual(respuesta.status_code, 403)
+        self.assertContains(respuesta, "Acceso Restringido: Expedientes Clínicos", status_code=403)
+        self.assertContains(respuesta, "Recepción", status_code=403)
+        self.assertContains(respuesta, "Pacientes", status_code=403)
 
     def test_usuario_administrador_puede_acceder_expedientes(self):
         self.client.force_login(self.user_admin)

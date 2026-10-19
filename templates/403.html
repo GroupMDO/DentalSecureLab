@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Acceso Restringido | DentalSecureLab
+{% endblock %}
+
+{% block content %}
+<div class="access-denied-container">
+    <div class="access-denied-card simple-card">
+        <div class="security-shield-icon">
+            <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+        </div>
+
+        <h2 class="access-denied-title">Acceso Restringido</h2>
+        <p class="access-simple-text">
+            No tienes permisos para acceder a esta sección.
+        </p>
+
+        <div class="access-denied-actions">
+            <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                Volver al Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

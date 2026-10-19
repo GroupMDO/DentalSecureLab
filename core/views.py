@@ -38,3 +38,14 @@ def dashboard(request):
         'dashboard.html',
         context
     )
+
+
+def custom_403_view(request, exception=None):
+    return render(
+        request,
+        '403.html',
+        {
+            'exception': str(exception) if exception else 'Acceso denegado',
+        },
+        status=403
+    )
