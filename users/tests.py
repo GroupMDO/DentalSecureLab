@@ -201,3 +201,31 @@ class LoginTest(TestCase):
         )
         self.assertEqual(r_ok.status_code, 302)
         self.assertIsNone(cache.get("login_attempts_usuario_recuperado"))
+
+    # Control de seguridad: Verificación de destrucción de sesión en logout (OWASP ASVS V3.3)
+    # Contribución técnica de QA: Pamela Vicario Lara (QA / Testing y Dependencias)
+    def test_logout_cierra_sesion_exitosamente(self):
+        """
+        Verifica que al invocar la vista de cierre de sesión (logout),
+        la sesión del usuario sea destruida inmediatamente y que
+        solicitudes subsiguientes a rutas protegidas (ej. dashboard)
+        sean redirigidas al formulario de login (HTTP 302).
+        Control OWASP ASVS v4.0.3 Nivel 2 - Requisito V3.3.
+        """
+        usuario = User.objects.create_user(
+            username="logout_prueba",
+            password="Prueba123!",
+        )
+
+        self.client.force_login(usuario)
+
+        respuesta = self.client.post(reverse("logout"))
+
+        self.assertEqual(respuesta.status_code, 302)
+        self.assertFalse(
+            respuesta.wsgi_request.user.is_authenticated
+        )
+
+        respuesta_dashboard = self.client.get(reverse("dashboard"))
+        self.assertEqual(respuesta_dashboard.status_code, 302)
+        self.assertIn("/usuarios/login/", respuesta_dashboard.url)
