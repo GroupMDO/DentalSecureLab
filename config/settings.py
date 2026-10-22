@@ -132,14 +132,40 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+STATIC_ROOT = Path(os.environ.get('STATIC_ROOT', BASE_DIR / 'staticfiles'))
 
 
-# Email
+# Email: parametrización sin credenciales fijas ni presunción de servidor SMTP (ASVS V14)
+DEFAULT_EMAIL_BACKEND = (
+    'django.core.mail.backends.console.EmailBackend' if DEBUG
+    else 'django.core.mail.backends.dummy.EmailBackend'
+)
+
+_email_backend = os.environ.get('EMAIL_BACKEND', DEFAULT_EMAIL_BACKEND)
+_default_mailer = {'BACKEND': _email_backend}
+_email_options = {}
+
+if os.environ.get('EMAIL_HOST'):
+    _email_options['host'] = os.environ['EMAIL_HOST']
+elif _email_backend == 'django.core.mail.backends.smtp.EmailBackend':
+    _email_options['host'] = 'localhost'
+
+if os.environ.get('EMAIL_PORT'):
+    _email_options['port'] = int(os.environ['EMAIL_PORT'])
+if os.environ.get('EMAIL_HOST_USER'):
+    _email_options['username'] = os.environ['EMAIL_HOST_USER']
+if os.environ.get('EMAIL_HOST_PASSWORD'):
+    _email_options['password'] = os.environ['EMAIL_HOST_PASSWORD']
+if os.environ.get('EMAIL_USE_TLS'):
+    _email_options['use_tls'] = os.environ['EMAIL_USE_TLS'].lower() in ('1', 'true', 'yes')
+if os.environ.get('EMAIL_USE_SSL'):
+    _email_options['use_ssl'] = os.environ['EMAIL_USE_SSL'].lower() in ('1', 'true', 'yes')
+
+if _email_options:
+    _default_mailer['OPTIONS'] = _email_options
 
 MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
+    'default': _default_mailer,
 }
 
 
@@ -162,4 +188,12 @@ CSRF_COOKIE_SECURE = not DEBUG
 # Cabeceras de protección HTTP (OWASP ASVS V14)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
+X_FRAME_OPTIONS = 'DENY'
+
+# Cabeceras SSL y HSTS parametrizables para entorno productivo (ASVS V14)
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('1', 'true', 'yes')
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+if SECURE_HSTS_SECONDS > 0:
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_SUBDOMAINS', 'False').lower() in ('1', 'true', 'yes')
+    SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False').lower() in ('1', 'true', 'yes')
+
