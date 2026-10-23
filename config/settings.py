@@ -21,12 +21,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # Parametrización segura con variables de entorno (ASVS V14)
-SECRET_KEY = os.environ.get(
-    'SECRET_KEY',
-    'django-insecure-9a&@9^=%rykulno*sxtpnw&*(3o7&4b=-s6n-c_8!l2lp)orgv'
-)
-
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+
+if not DEBUG:
+    SECRET_KEY = os.environ.get('SECRET_KEY', '')
+    if not SECRET_KEY or SECRET_KEY.startswith('django-insecure-') or len(SECRET_KEY) < 50:
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured(
+            "SECRET_KEY no configurada o insegura en entorno de producción (DEBUG=False). "
+            "Debe definirse una clave criptográfica de al menos 50 caracteres en .env (ASVS V14.2)."
+        )
+else:
+    SECRET_KEY = os.environ.get(
+        'SECRET_KEY',
+        'django-insecure-9a&@9^=%rykulno*sxtpnw&*(3o7&4b=-s6n-c_8!l2lp)orgv'
+    )
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -132,14 +141,40 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+STATIC_ROOT = Path(os.environ.get('STATIC_ROOT', BASE_DIR / 'staticfiles'))
 
 
-# Email
+# Email: parametrización sin credenciales fijas ni presunción de servidor SMTP (ASVS V14)
+DEFAULT_EMAIL_BACKEND = (
+    'django.core.mail.backends.console.EmailBackend' if DEBUG
+    else 'django.core.mail.backends.dummy.EmailBackend'
+)
+
+_email_backend = os.environ.get('EMAIL_BACKEND', DEFAULT_EMAIL_BACKEND)
+_default_mailer = {'BACKEND': _email_backend}
+_email_options = {}
+
+if os.environ.get('EMAIL_HOST'):
+    _email_options['host'] = os.environ['EMAIL_HOST']
+elif _email_backend == 'django.core.mail.backends.smtp.EmailBackend':
+    _email_options['host'] = 'localhost'
+
+if os.environ.get('EMAIL_PORT'):
+    _email_options['port'] = int(os.environ['EMAIL_PORT'])
+if os.environ.get('EMAIL_HOST_USER'):
+    _email_options['username'] = os.environ['EMAIL_HOST_USER']
+if os.environ.get('EMAIL_HOST_PASSWORD'):
+    _email_options['password'] = os.environ['EMAIL_HOST_PASSWORD']
+if os.environ.get('EMAIL_USE_TLS'):
+    _email_options['use_tls'] = os.environ['EMAIL_USE_TLS'].lower() in ('1', 'true', 'yes')
+if os.environ.get('EMAIL_USE_SSL'):
+    _email_options['use_ssl'] = os.environ['EMAIL_USE_SSL'].lower() in ('1', 'true', 'yes')
+
+if _email_options:
+    _default_mailer['OPTIONS'] = _email_options
 
 MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
+    'default': _default_mailer,
 }
 
 
@@ -162,4 +197,23 @@ CSRF_COOKIE_SECURE = not DEBUG
 # Cabeceras de protección HTTP (OWASP ASVS V14)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
+X_FRAME_OPTIONS = 'DENY'
+
+# Cabeceras SSL y HSTS parametrizables para entorno productivo (ASVS V14)
+# Detección confiable de HTTPS detrás del proxy inverso Nginx
+# Evita bucles de redirección circular (HTTP 301 loop) cuando Nginx termina SSL
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() in ('1', 'true', 'yes')
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+if SECURE_HSTS_SECONDS > 0:
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_SUBDOMAINS', 'False').lower() in ('1', 'true', 'yes')
+    SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False').lower() in ('1', 'true', 'yes')
+
+# Silenciamiento configurable de advertencias del sistema de verificación (opcional para Infraestructura)
+SILENCED_SYSTEM_CHECKS = [
+    check.strip()
+    for check in os.environ.get('SILENCED_SYSTEM_CHECKS', '').split(',')
+    if check.strip()
+]
+
